@@ -74,7 +74,7 @@ defmodule BlockServer do
       :mine_block  -> # function for mining, substring of hash checked, if not matched, nonce incremented
                       # then hash is recalculated. New nonce and hash are updated in state
         difficulty = 2
-        IO.inspect hash
+        # IO.inspect hash
         nonce = "0"
         mine({timestamp, data, previous_hash, hash}, nonce, difficulty)
         {:reply, {:ok, "block mined"}, state}
@@ -82,8 +82,8 @@ defmodule BlockServer do
   end
 
   defp mine({timestamp, data, previous_hash, hash}, nonce, difficulty) do
-    IO.inspect hash
-    if String.slice(hash, 0..difficulty-1) != "00" do
+    # IO.inspect hash
+    if String.slice(hash, 0..difficulty-1) != "00" do # RHS length i.e. "00" here equals difficulty
       new_hash = [timestamp, data, previous_hash, nonce]
       |> Utils.calculate_hash
       mine({timestamp, data, previous_hash, new_hash}, nonce <> "0", difficulty)

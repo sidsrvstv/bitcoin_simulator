@@ -42,7 +42,9 @@ defmodule BlockChainServer do
     answer
   end
 
-
+  def get_lenght_of_chain() do
+    {:ok, len} = GenServer.call(__MODULE__, :get_length)
+  end
 
   #------------#
   # Server API #
@@ -61,6 +63,10 @@ defmodule BlockChainServer do
 
   def handle_call(:get_last, _from, state) do
     {:reply, {:ok, List.last(state)}, state }
+  end
+
+  def handle_call(:get_length, _from, state) do
+    {:reply, {:ok, length(state)}, state}
   end
 
   def handle_call(:is_chain_valid, _from, state) do
