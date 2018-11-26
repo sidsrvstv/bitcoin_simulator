@@ -30,7 +30,7 @@ defmodule Transaction do
             if valid do
                 {:ok, valid}
             else
-                {error, "Signature could not be verified."}
+                {:error, "Signature could not be verified."}
             end
         end
     end
