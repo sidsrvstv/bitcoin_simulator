@@ -85,7 +85,8 @@ defmodule BlockServer do
 
   defp mine({data, previous_hash, hash}, nonce, difficulty) do
     # IO.inspect hash
-    if String.slice(hash, 0..difficulty-1) != "00" do # RHS length i.e. "00" here equals difficulty
+    target = String.duplicate("0", difficulty)
+    if String.slice(hash, 0..difficulty-1) != target do # RHS length i.e. "00" here equals difficulty
       new_hash = [data, previous_hash, Kernel.inspect(nonce)]
       |> Utils.calculate_hash
       mine({data, previous_hash, new_hash}, nonce + 1, difficulty)

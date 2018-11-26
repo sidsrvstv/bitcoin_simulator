@@ -1,8 +1,9 @@
 defmodule Transaction do
+
     defstruct to: nil,
               from: nil,
               amount: 0
-    
+
     def init(to_addr, from_addr, amt) do
         %Transaction{to: to_addr, from: from_addr, amount: amt}
     end
