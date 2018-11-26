@@ -2,7 +2,7 @@ defmodule Transaction do
     # defstruct to: nil,
     #           from: nil,
     #           amount: 0,
-    
+
     def init(to, from, amount, priv_key) do
         msg = get_message(to, from, amount)
         signature = sign(msg, priv_key)

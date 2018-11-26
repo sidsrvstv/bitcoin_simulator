@@ -54,6 +54,26 @@ defmodule BlockChainServer do
     {:via, :gproc, {:n, :l, {:user_name, name}}}
   end
 
+  # def create_transaction(name) do
+  #   # pass
+  # end
+
+  # def broadcast_message(name, message) do
+  #   # pass
+  # end
+
+  # def receieve_transaction(name, transaction) do
+  #   # pass
+  # end
+
+  # def authenticate(name, transaction) do
+  #   # pass
+  # end
+
+  # def get_longest_chain(name) do
+  #   # pass
+  # end
+
   #------------#
   # Server API #
   #------------#
