@@ -96,5 +96,17 @@ defmodule BitcoinSimulatorTest do
     assert txn.amount == 10 and txn.to == alice_pk and txn.from == bob_pk
   end
 
+  test "wallet keys" do
+    wallet = Wallet.init()
+
+    txt = "message"
+
+    {:ok, encrypted_txt} = RsaEx.encrypt(txt, {:private_key, wallet.priv_key})
+
+    {:ok, decrypted_txt} = RsaEx.decrypt(encrypted_txt, {:public_key, wallet.public_key})
+
+    assert decrypted_txt == txt
+  end
+
 
 end
