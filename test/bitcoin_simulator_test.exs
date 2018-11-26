@@ -70,11 +70,9 @@ defmodule BitcoinSimulatorTest do
 
     txn_sign = Transaction.init(to, from, amount, bob_sk)
 
-    verify = Transaction.check_valid_signature(to, from, amount, txn_sign, bob_pk)
+    {atom, verify} = Transaction.check_valid_signature(to, from, amount, txn_sign, bob_pk)
 
-
-
-
+    assert atom == :ok
   end
 
 
