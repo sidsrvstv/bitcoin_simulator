@@ -30,9 +30,16 @@ defmodule BlockServer do
     mine block routine, current difficulty set to 2, can increase or decrease it
   """
   def mine_block(block_pid) do
-    {:ok, "block mined", state} = GenServer.call(block_pid, :mine_block, 100_000)
+    nonce = 0
+    {:ok, "block mined", state} = GenServer.call(block_pid, {:mine_block, nonce}, 100_000)
     {:ok, state}
   end
+
+  def pool_mine(block_pid, nonce) do
+    {:ok, "block mined", state} = GenServer.cast(block_pid, {:mine_block, nonce}, 100_000)
+    {:ok, state}
+  end
+
 
   #------------#
   # Server API #
@@ -54,33 +61,49 @@ defmodule BlockServer do
     {:ok, state}
   end
 
-
-  def handle_call(pattern, _from, state) do
+  def handle_call({:mine_block, nonce}, _from, state) do
     data = Map.fetch!(state, :data)
     previous_hash = Map.fetch!(state, :previous_hash)
     hash = Map.fetch!(state, :hash)
+
+    difficulty = 2
+
+    {:ok, {final_hash, final_nonce}} = mine({data, previous_hash, hash}, nonce, difficulty)
+    state1 = Map.put(state, :nonce, final_nonce)
+    state2 = Map.put(state1, :hash, final_hash)
+    state3 = Map.put(state2, :miner_reward, 10)
+
+    {:reply, {:ok, "block mined", state3}, state3}
+  end
+
+  def handle_cast({:mine_block, nonce}, state) do
+    data = Map.fetch!(state, :data)
+    previous_hash = Map.fetch!(state, :previous_hash)
+    hash = Map.fetch!(state, :hash)
+
+    difficulty = 2
+
+    {:ok, {final_hash, final_nonce}} = mine({data, previous_hash, hash}, nonce, difficulty)
+    state1 = Map.put(state, :nonce, final_nonce)
+    state2 = Map.put(state1, :hash, final_hash)
+    state3 = Map.put(state2, :miner_reward, 10)
+
+    {:noreply, state3}
+  end
+
+  def handle_call(:get_hash , _from, state) do
+    data = Map.fetch!(state, :data)
+    previous_hash = Map.fetch!(state, :previous_hash)
     nonce = Map.fetch!(state, :nonce)
-    case pattern do
-      :get_hash -> # function to re calculate hash
-        hash = [data, previous_hash, Kernel.inspect(nonce)]
-        |> Utils.calculate_hash
 
-        {:reply, {:ok, hash}, state}
+    hash = [data, previous_hash, Kernel.inspect(nonce)]
+    |> Utils.calculate_hash
 
-      :get_state -> # function to return current state
-        {:reply, {:ok, state}, state}
+    {:reply, {:ok, hash}, state}
+  end
 
-      :mine_block  -> # function for mining, substring of hash checked, if not matched, nonce incremented
-                      # then hash is recalculated. New nonce and hash are updated in state
-        difficulty = 2
-        nonce = 0
-        {:ok, {final_hash, final_nonce}} = mine({data, previous_hash, hash}, nonce, difficulty)
-        state1 = Map.put(state, :nonce, final_nonce)
-        state2 = Map.put(state1, :hash, final_hash)
-        state3 = Map.put(state2, :miner_reward, 10)
-        # IO.inspect state3
-        {:reply, {:ok, "block mined", state3}, state3}
-    end
+  def handle_call(:get_state, _from, state) do
+      {:reply, {:ok, state}, state}
   end
 
   defp mine({data, previous_hash, hash}, nonce, difficulty) do
