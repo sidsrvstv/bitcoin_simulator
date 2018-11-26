@@ -24,12 +24,16 @@ defmodule BlockChainServer do
     new block is initialized with the data
     block is mined and then added to the top of chain
   """
-  def add_block(name, tx_data) do
+  def add_block(name, block) do
+    GenServer.call(via_tuple(name), {:add_block, block})
+  end
+
+  def mine_block(name, tx_data) do
     {:ok, last_block} = get_latest_block(name)
     previous_hash = Map.fetch!(last_block, :hash)
     items = tx_data ++  [previous_hash]  # tx_data is [timestamp, data]
     {:ok, new_block_pid} = BlockServer.start_link(items)
-    GenServer.call(via_tuple(name), {:add_block, new_block_pid}, 100_000)
+    GenServer.call(via_tuple(name), {:mine_block, new_block_pid}, 100_000)
   end
 
   @doc """
@@ -54,25 +58,7 @@ defmodule BlockChainServer do
     {:via, :gproc, {:n, :l, {:user_name, name}}}
   end
 
-  # def create_transaction(name) do
-  #   # pass
-  # end
 
-  # def broadcast_message(name, message) do
-  #   # pass
-  # end
-
-  # def receieve_transaction(name, transaction) do
-  #   # pass
-  # end
-
-  # def authenticate(name, transaction) do
-  #   # pass
-  # end
-
-  # def get_longest_chain(name) do
-  #   # pass
-  # end
 
   #------------#
   # Server API #
@@ -124,11 +110,14 @@ defmodule BlockChainServer do
     {:reply, {:ok, Map.fetch!(result, :final)}, state}
   end
 
-  def handle_call({:add_block, block_pid}, _from, state) do
-    {:ok, updated_block} = BlockServer.mine_block(block_pid)  # spend time to mine block
-    new_state = state ++ [updated_block]
+  def handle_call({:add_block, block}, _from, state) do
+    new_state = state ++ [block]
     {:reply, :ok, new_state }
   end
 
+  def handle_call({:mine_block, block_pid}, _from, state) do
+    {:ok, new_block} = BlockServer.mine_block(block_pid)  # spend time to mine block
+    {:reply, {:ok, new_block}, state }
+  end
 
 end

@@ -2,7 +2,7 @@ defmodule BitcoinSimulatorTest do
   use ExUnit.Case
 
   setup do
-    {:ok, blockchain} = BlockChainServer.start_link("1")
+    {:ok, blockchain} = BlockChainServer.start_link("1") # referring to blockchain by number ("1") not pid in code
     {:ok, server: blockchain}
   end
 
@@ -10,14 +10,16 @@ defmodule BitcoinSimulatorTest do
     tx1 = ["seller: Alice, buyer: Bob, amount = 10"]
     tx2 = ["seller: Alice, buyer: Charlie, amount = 20"]
     tx3 = ["seller: Bob, buyer: Charlie, amount = 15"]
-    BlockChainServer.add_block("1",tx1)
-    # BlockChainServer.get_latest_block()
 
-    BlockChainServer.add_block("1",tx2)
-    # BlockChainServer.get_latest_block()
+    {:ok, block1} = BlockChainServer.mine_block("1", tx1) # mine block
+    BlockChainServer.add_block("1",block1) # add block to blockchain
 
-    BlockChainServer.add_block("1",tx3)
-    # BlockChainServer.get_latest_block()
+    {:ok, block2} = BlockChainServer.mine_block("1", tx2)
+    BlockChainServer.add_block("1",block2)
+
+    {:ok, block3} = BlockChainServer.mine_block("1", tx3)
+    BlockChainServer.add_block("1",block3)
+
 
     assert BlockChainServer.get_lenght_of_chain("1") == {:ok, 4} # genesis block is added upon initialization
 
@@ -25,7 +27,8 @@ defmodule BitcoinSimulatorTest do
 
   test "correctness of hashes" do
     tx = ["seller: Bob, buyer: Charlie, amount = 10"]
-    BlockChainServer.add_block("1",tx)
+    {:ok, block} = BlockChainServer.mine_block("1", tx)
+    BlockChainServer.add_block("1",block)
 
     {:ok, block} = BlockChainServer.get_latest_block("1")
     data = Map.fetch!(block, :data)
@@ -33,7 +36,7 @@ defmodule BitcoinSimulatorTest do
     nonce = Map.fetch!(block, :nonce)
 
     difficulty = 2
-    target = "00"
+    target = String.duplicate("0", difficulty)
     calculated_hash = [data, previous_hash, Kernel.inspect(nonce)]
     |> Utils.calculate_hash
 
@@ -43,7 +46,8 @@ defmodule BitcoinSimulatorTest do
 
   test "calculated hash is same as stored hash" do
     tx = ["seller: Bob, buyer: Charlie, amount = 10"]
-    BlockChainServer.add_block("1",tx)
+    {:ok, block} = BlockChainServer.mine_block("1", tx)
+    BlockChainServer.add_block("1",block)
 
     {:ok, block} = BlockChainServer.get_latest_block("1")
     data = Map.fetch!(block, :data)
@@ -70,7 +74,7 @@ defmodule BitcoinSimulatorTest do
 
     txn_sign = Transaction.init(to, from, amount, bob_sk)
 
-    {atom, verify} = Transaction.check_valid_signature(to, from, amount, txn_sign, bob_pk)
+    {atom, _} = Transaction.check_valid_signature(to, from, amount, txn_sign, bob_pk)
 
     assert atom == :ok
   end
