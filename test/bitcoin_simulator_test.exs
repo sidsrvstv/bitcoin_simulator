@@ -57,5 +57,25 @@ defmodule BitcoinSimulatorTest do
 
   end
 
+  test "transaction signature and verification" do
+    {:ok, bob_sk} = RsaEx.generate_private_key
+    {:ok, bob_pk} = RsaEx.generate_public_key(bob_sk)
+
+    {:ok, alice_sk} = RsaEx.generate_private_key
+    {:ok, alice_pk} = RsaEx.generate_public_key(alice_sk)
+
+    to = alice_pk
+    from = bob_pk
+    amount = 10
+
+    txn_sign = Transaction.init(to, from, amount, bob_sk)
+
+    verify = Transaction.check_valid_signature(to, from, amount, txn_sign, bob_pk)
+
+
+
+
+  end
+
 
 end

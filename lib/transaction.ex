@@ -27,6 +27,11 @@ defmodule Transaction do
             {:error, err_msg}
         else
             {:ok, valid} = RsaEx.verify(msg, signature, pub_key)
+            if valid do
+                {:ok, valid}
+            else
+                {error, "Signature could not be verified."}
+            end
         end
     end
 end
