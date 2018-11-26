@@ -90,7 +90,7 @@ defmodule BlockServer do
       |> Utils.calculate_hash
       mine({data, previous_hash, new_hash}, nonce + 1, difficulty)
     else
-      {:ok, {hash, nonce}}
+      {:ok, {hash, nonce-1}}
     end
 
   end
