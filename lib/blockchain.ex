@@ -46,6 +46,11 @@ defmodule BlockChainServer do
     {:ok, len} = GenServer.call(__MODULE__, :get_length)
   end
 
+  def get_full_chain() do
+    GenServer.call(__MODULE__, :get_full_chain)
+  end
+
+
   #------------#
   # Server API #
   #------------#
@@ -55,7 +60,7 @@ defmodule BlockChainServer do
     state is list of maps
   """
   def init(_) do
-    {:ok, block_pid} = BlockServer.start_link([Kernel.inspect(NaiveDateTime.utc_now), "Genesis Block", "0"])
+    {:ok, block_pid} = BlockServer.start_link(["Genesis Block", "0"])
     {:ok, state} = BlockServer.get_block_info(block_pid)
 
     {:ok, [state]}
@@ -69,15 +74,20 @@ defmodule BlockChainServer do
     {:reply, {:ok, length(state)}, state}
   end
 
+  def handle_call(:get_full_chain, _from, state) do
+    {:reply, {:ok, state}, state}
+  end
+
   def handle_call(:is_chain_valid, _from, state) do
     result = %{:final => True}
     for i <- 1..length(state)-1 do
       current_block = Enum.at(state, i)
 
-      c_timestamp = Map.fetch!(current_block, :timestamp)
+
       c_data = Map.fetch!(current_block, :data)
       c_previoushash = Map.fetch!(current_block, :previous_hash)
-      items = [c_timestamp, c_data, c_previoushash]
+      c_nonce = Map.fetch!(current_block, :nonce)
+      items = [c_data, c_previoushash, c_nonce]
 
       previous_block = Enum.at(state, i-1)
 
@@ -93,8 +103,8 @@ defmodule BlockChainServer do
 
   def handle_call({:add_block, block_pid}, _from, state) do
     {:ok, block_info} = BlockServer.get_block_info(block_pid)
-    BlockServer.mine_block(block_pid)  # spend time to mine block
-    new_state = state ++ [block_info]
+    {:ok, updated_block} = BlockServer.mine_block(block_pid)  # spend time to mine block
+    new_state = state ++ [updated_block]
     {:reply, :ok, new_state }
   end
 

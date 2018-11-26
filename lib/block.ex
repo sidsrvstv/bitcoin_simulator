@@ -30,7 +30,8 @@ defmodule BlockServer do
     mine block routine, current difficulty set to 2, can increase or decrease it
   """
   def mine_block(block_pid) do
-    GenServer.call(block_pid, :mine_block, 100_000)
+    {:ok, "block mined", state} = GenServer.call(block_pid, :mine_block, 100_000)
+    {:ok, state}
   end
 
   #------------#
@@ -38,18 +39,16 @@ defmodule BlockServer do
   #------------#
 
   @doc """
-    initialize one block, with index or position of block, timestamp,
-    data and the hash of previous block
+    initialize one block, with dummy data and the dummy hash of previous block
   """
-  def init([timestamp, data, previous_hash]) do
-
-    current_hash = [timestamp, data, previous_hash]
+  def init([data, previous_hash]) do
+    current_hash = [data, previous_hash, "0"]
     |> Utils.calculate_hash
-
-    state = %{:timestamp => timestamp,
-              :data => data,
+    state = %{:data => data,
               :previous_hash => previous_hash,
-              :hash => current_hash
+              :nonce => 0,
+              :hash => current_hash,
+              :miner_reward => 0
     }
 
     {:ok, state}
@@ -57,13 +56,13 @@ defmodule BlockServer do
 
 
   def handle_call(pattern, _from, state) do
-    timestamp = Map.fetch!(state, :timestamp)
     data = Map.fetch!(state, :data)
     previous_hash = Map.fetch!(state, :previous_hash)
     hash = Map.fetch!(state, :hash)
+    nonce = Map.fetch!(state, :nonce)
     case pattern do
       :get_hash -> # function to re calculate hash
-        hash = [timestamp, data, previous_hash]
+        hash = [data, previous_hash, Kernel.inspect(nonce)]
         |> Utils.calculate_hash
 
         {:reply, {:ok, hash}, state}
@@ -74,21 +73,25 @@ defmodule BlockServer do
       :mine_block  -> # function for mining, substring of hash checked, if not matched, nonce incremented
                       # then hash is recalculated. New nonce and hash are updated in state
         difficulty = 2
-        # IO.inspect hash
-        nonce = "0"
-        mine({timestamp, data, previous_hash, hash}, nonce, difficulty)
-        {:reply, {:ok, "block mined"}, state}
+        nonce = 0
+        {:ok, {final_hash, final_nonce}} = mine({data, previous_hash, hash}, nonce, difficulty)
+        state1 = Map.put(state, :nonce, final_nonce)
+        state2 = Map.put(state1, :hash, final_hash)
+        state3 = Map.put(state2, :miner_reward, 10)
+        # IO.inspect state3
+        {:reply, {:ok, "block mined", state3}, state3}
     end
   end
 
-  defp mine({timestamp, data, previous_hash, hash}, nonce, difficulty) do
+  defp mine({data, previous_hash, hash}, nonce, difficulty) do
     # IO.inspect hash
     if String.slice(hash, 0..difficulty-1) != "00" do # RHS length i.e. "00" here equals difficulty
-      new_hash = [timestamp, data, previous_hash, nonce]
+      new_hash = [data, previous_hash, Kernel.inspect(nonce)]
       |> Utils.calculate_hash
-      mine({timestamp, data, previous_hash, new_hash}, nonce <> "0", difficulty)
+      mine({data, previous_hash, new_hash}, nonce + 1, difficulty)
+    else
+      {:ok, {hash, nonce}}
     end
-    {:ok}
 
   end
 
