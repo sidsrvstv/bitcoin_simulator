@@ -2,7 +2,7 @@ defmodule BitcoinSimulatorTest do
   use ExUnit.Case
 
   setup do
-    {:ok, blockchain} = BlockChainServer.start_link()
+    {:ok, blockchain} = BlockChainServer.start_link("1")
     {:ok, server: blockchain}
   end
 
@@ -10,24 +10,24 @@ defmodule BitcoinSimulatorTest do
     tx1 = ["seller: Alice, buyer: Bob, amount = 10"]
     tx2 = ["seller: Alice, buyer: Charlie, amount = 20"]
     tx3 = ["seller: Bob, buyer: Charlie, amount = 15"]
-    BlockChainServer.add_block(tx1)
+    BlockChainServer.add_block("1",tx1)
     # BlockChainServer.get_latest_block()
 
-    BlockChainServer.add_block(tx2)
+    BlockChainServer.add_block("1",tx2)
     # BlockChainServer.get_latest_block()
 
-    BlockChainServer.add_block(tx3)
+    BlockChainServer.add_block("1",tx3)
     # BlockChainServer.get_latest_block()
 
-    assert BlockChainServer.get_lenght_of_chain() == {:ok, 4} # genesis block is added upon initialization
+    assert BlockChainServer.get_lenght_of_chain("1") == {:ok, 4} # genesis block is added upon initialization
 
   end
 
   test "correctness of hashes" do
     tx = ["seller: Bob, buyer: Charlie, amount = 10"]
-    BlockChainServer.add_block(tx)
+    BlockChainServer.add_block("1",tx)
 
-    {:ok, block} = BlockChainServer.get_latest_block()
+    {:ok, block} = BlockChainServer.get_latest_block("1")
     data = Map.fetch!(block, :data)
     previous_hash = Map.fetch!(block, :previous_hash)
     nonce = Map.fetch!(block, :nonce)
@@ -41,11 +41,11 @@ defmodule BitcoinSimulatorTest do
 
   end
 
-  test "calculated hash is stored hash" do
+  test "calculated hash is same as stored hash" do
     tx = ["seller: Bob, buyer: Charlie, amount = 10"]
-    BlockChainServer.add_block(tx)
+    BlockChainServer.add_block("1",tx)
 
-    {:ok, block} = BlockChainServer.get_latest_block()
+    {:ok, block} = BlockChainServer.get_latest_block("1")
     data = Map.fetch!(block, :data)
     previous_hash = Map.fetch!(block, :previous_hash)
     nonce = Map.fetch!(block, :nonce)

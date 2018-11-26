@@ -8,15 +8,15 @@ defmodule BlockChainServer do
   @doc """
     start the BlockChain server
   """
-  def start_link(state \\ []) do
-    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  def start_link(name) do
+    GenServer.start_link(__MODULE__, [], name: via_tuple(name))
   end
 
   @doc """
     returns the state of the block on top of chain
   """
-  def get_latest_block() do
-    GenServer.call(__MODULE__, :get_last)
+  def get_latest_block(name) do
+    GenServer.call(via_tuple(name), :get_last)
   end
 
   @doc """
@@ -24,12 +24,12 @@ defmodule BlockChainServer do
     new block is initialized with the data
     block is mined and then added to the top of chain
   """
-  def add_block(tx_data) do
-    {:ok, last_block} = get_latest_block()
+  def add_block(name, tx_data) do
+    {:ok, last_block} = get_latest_block(name)
     previous_hash = Map.fetch!(last_block, :hash)
     items = tx_data ++  [previous_hash]  # tx_data is [timestamp, data]
     {:ok, new_block_pid} = BlockServer.start_link(items)
-    GenServer.call(__MODULE__, {:add_block, new_block_pid}, 100_000)
+    GenServer.call(via_tuple(name), {:add_block, new_block_pid}, 100_000)
   end
 
   @doc """
@@ -37,19 +37,22 @@ defmodule BlockChainServer do
     if value has been modified in the middle, the hash which depends upon previous hash too will now
     be different than the one stored making the blockchain invalid
   """
-  def is_chain_valid() do
-    {:ok, answer} = GenServer.call(__MODULE__, :is_chain_valid)
+  def is_chain_valid(name) do
+    {:ok, answer} = GenServer.call(via_tuple(name), :is_chain_valid)
     answer
   end
 
-  def get_lenght_of_chain() do
-    {:ok, len} = GenServer.call(__MODULE__, :get_length)
+  def get_lenght_of_chain(name) do
+    GenServer.call(via_tuple(name), :get_length)
   end
 
-  def get_full_chain() do
-    GenServer.call(__MODULE__, :get_full_chain)
+  def get_full_chain(name) do
+    GenServer.call(via_tuple(name), :get_full_chain)
   end
 
+  defp via_tuple(name) do
+    {:via, :gproc, {:n, :l, {:user_name, name}}}
+  end
 
   #------------#
   # Server API #
@@ -102,7 +105,6 @@ defmodule BlockChainServer do
   end
 
   def handle_call({:add_block, block_pid}, _from, state) do
-    {:ok, block_info} = BlockServer.get_block_info(block_pid)
     {:ok, updated_block} = BlockServer.mine_block(block_pid)  # spend time to mine block
     new_state = state ++ [updated_block]
     {:reply, :ok, new_state }

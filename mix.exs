@@ -14,7 +14,8 @@ defmodule BitcoinSimulator.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      # extra_applications: [:logger]
+      applications: [:logger, :rsa_ex, :gproc]
       # applications: [:rsa_ex]
     ]
   end
@@ -22,7 +23,10 @@ defmodule BitcoinSimulator.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # [{:rsa_ex, "~> 0.4"}]
+      rsa_ex: "~> 0.4",
+      gproc: "0.3.1"
+      #  [{:rsa_ex, "~> 0.4"}],
+      #  [{:gproc, "0.3.1"}]
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
