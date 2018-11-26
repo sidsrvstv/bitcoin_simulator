@@ -68,11 +68,27 @@ defmodule BitcoinSimulatorTest do
     from = bob_pk
     amount = 10
 
-    txn_sign = Transaction.init(to, from, amount, bob_sk)
+    txn = Transaction.init(to, from, amount)
+    txn_sign = Transaction.sign_transaction(txn, bob_sk)
 
-    {atom, verify} = Transaction.check_valid_signature(to, from, amount, txn_sign, bob_pk)
+    {atom, verify} = Transaction.check_valid_signature(txn, txn_sign, bob_pk)
 
     assert atom == :ok
+  end
+
+  test "creating transaction" do
+    {:ok, bob_sk} = RsaEx.generate_private_key
+    {:ok, bob_pk} = RsaEx.generate_public_key(bob_sk)
+
+    {:ok, alice_sk} = RsaEx.generate_private_key
+    {:ok, alice_pk} = RsaEx.generate_public_key(alice_sk)
+
+    to = alice_pk
+    from = bob_pk
+    amount = 10
+
+    txn = Transaction.init(to, from, amount)
+    IO.inspect txn.amount
   end
 
 
