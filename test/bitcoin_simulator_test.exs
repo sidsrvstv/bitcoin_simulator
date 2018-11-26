@@ -88,7 +88,7 @@ defmodule BitcoinSimulatorTest do
     amount = 10
 
     txn = Transaction.init(to, from, amount)
-    IO.inspect txn.amount
+    assert txn.amount == 10 and txn.to == alice_pk and txn.from == bob_pk
   end
 
 
