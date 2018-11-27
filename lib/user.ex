@@ -76,7 +76,7 @@ defmodule User do
     pk = Map.fetch!(wallet, :pub_key)
     sk = Map.fetch!(wallet, :priv_key)
     amount = Map.fetch!(transaction, :amount)
-    if wallet.get_balance(pk, sk) >= amount do
+    if Wallet.get_balance(pk, sk) >= amount do
       {:ok}
     else
       {:error, "insufficient balance"}
