@@ -19,21 +19,33 @@ defmodule User do
     end
   end
 
-  def get_header(pub_key) do
-    
+  def get_latest_block(name) do
+    GenServer.call(via_tuple(name), :get_latest_block)
+  end
+
+  def add_block(name, block) do
+    GenServer.call(via_tuple(name), {:add_block, block})
   end
 
   def mine_block(name, transaction) do
     GenServer.call(via_tuple(name), {:mine_block, transaction})
   end
 
-  def get_user_publickey(name) do
+  def get_publickey(name) do
     GenServer.call(via_tuple(name), :get_pk)
   end
 
   def get_balance(name) do
     {:ok, balance} = GenServer.call(via_tuple(name), :get_balance)
     balance
+  end
+
+  def get_complete_blockchain(name) do
+    GenServer.call(via_tuple(name), :get_blockchain)
+  end
+
+  def get_lenght_of_chain(name) do
+    GenServer.call(via_tuple(name), :get_chainlength)
   end
 
   defp via_tuple(name) do
@@ -50,12 +62,10 @@ defmodule User do
   """
   def init(name) do
     wallet = Wallet.init
-    # {:ok, name_sk} = RsaEx.generate_private_key
-    # {:ok, name_pk} = RsaEx.generate_public_key(name_sk)
 
     {:ok, block_pid} = BlockChainServer.start_link(wallet.priv_key)
     state = %{:wallet => wallet,
-              :blockchain => block_pid
+              :blockchain => wallet.priv_key
     }
 
     {:ok, state}
@@ -66,11 +76,44 @@ defmodule User do
   end
 
   def handle_call(:get_pk, _from, state) do
-    {:ok, {:ok, Map.fetch!(state, :pk)}, state}
+    wallet = Map.fetch!(state, :wallet)
+    pk = Map.fetch!(wallet, :priv_key)
+    {:reply, {:ok, pk}, state}
   end
 
   def handle_call(:get_balance, _from, state) do
 
+  end
+
+  def handle_call({:add_block, block}, _from, state) do
+    id = Map.fetch!(state, :blockchain)
+    BlockChainServer.add_block(id,block)
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:mine_block, transaction}, _from, state) do
+    id = Map.fetch!(state, :blockchain)
+    IO.inspect id
+    {:ok, block} = BlockChainServer.mine_block(id, transaction)
+    {:reply, {:ok, block}, state}
+  end
+
+  def handle_call(:get_chainlength, _from, state) do
+    id = Map.fetch!(state, :blockchain)
+    {:ok, len} = BlockChainServer.get_lenght_of_chain(id)
+    {:reply, {:ok, len}, state}
+  end
+
+  def handle_call(:get_blockchain, _from, state) do
+    id = Map.fetch!(state, :blockchain)
+    {:ok, blockchain} = BlockChainServer.get_full_chain(id)
+    {:reply, {:ok, blockchain}, state}
+  end
+
+  def handle_call(:get_latest_block, _from, state) do
+    id = Map.fetch!(state, :blockchain)
+    {:ok, block} = BlockChainServer.get_latest_block(id)
+    {:reply, {:ok, block}, state}
   end
 
 end
