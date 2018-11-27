@@ -9,7 +9,9 @@ defmodule Wallet do
         %Wallet{priv_key: sk, pub_key: pk}
     end
 
-    def get_balance() do
-        
+    def get_balance(pub_key) do
+        blockchain = User.get_header(pub_key)
+        #def calc_balance(blockchain)
+
     end
 end

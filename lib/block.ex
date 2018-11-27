@@ -49,13 +49,17 @@ defmodule BlockServer do
     initialize one block, with dummy data and the dummy hash of previous block
   """
   def init([data, previous_hash]) do
+    if data != "Genesis Block" do
+      miner_reward = Transaction.init(data.to, nil, 5) #Constant miner reward of 5
+      transaction_fee = Transaction.init(data.to, data.from, 1) #Constant miner reward of 1
+      data = [data, miner_reward, transaction_fee]
+    end
     current_hash = [data, previous_hash, "0"]
     |> Utils.calculate_hash
     state = %{:data => data,
               :previous_hash => previous_hash,
               :nonce => 0,
-              :hash => current_hash,
-              :miner_reward => 0
+              :hash => current_hash
     }
 
     {:ok, state}
