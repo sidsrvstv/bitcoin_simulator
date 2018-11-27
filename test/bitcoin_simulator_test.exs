@@ -103,7 +103,7 @@ defmodule BitcoinSimulatorTest do
 
     {:ok, encrypted_txt} = RsaEx.encrypt(txt, {:private_key, wallet.priv_key})
 
-    {:ok, decrypted_txt} = RsaEx.decrypt(encrypted_txt, {:public_key, wallet.public_key})
+    {:ok, decrypted_txt} = RsaEx.decrypt(encrypted_txt, {:public_key, wallet.pub_key})
 
     assert decrypted_txt == txt
   end
@@ -146,5 +146,6 @@ defmodule BitcoinSimulatorTest do
     assert User.get_balance("bob") == 15   # check 2
 
     assert BlockChainServer.get_lenght_of_chain(to_alice) == BlockChainServer.get_lenght_of_chain(to_bob) # check 3
+  end
 
 end
