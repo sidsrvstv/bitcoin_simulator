@@ -75,9 +75,8 @@ defmodule BlockServer do
     {:ok, {final_hash, final_nonce}} = mine({data, previous_hash, hash}, nonce, difficulty)
     state1 = Map.put(state, :nonce, final_nonce)
     state2 = Map.put(state1, :hash, final_hash)
-    state3 = Map.put(state2, :miner_reward, 10)
 
-    {:reply, {:ok, "block mined", state3}, state3}
+    {:reply, {:ok, "block mined", state2}, state2}
   end
 
   def handle_cast({:mine_block, nonce}, state) do

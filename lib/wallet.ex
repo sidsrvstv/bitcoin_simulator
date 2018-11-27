@@ -11,7 +11,20 @@ defmodule Wallet do
 
     def get_balance(pub_key) do
         blockchain = User.get_header(pub_key)
-        #def calc_balance(blockchain)
+        balance = Enum.each blockchain, fn block ->
+            curr = 0
+            data = block.data
+            val = Enum.each data fn txn ->
+                tmp = 0
+                if txn.to == pub_key do
+                    tmp = txn.amount
+                else if txn.from == pub_key
+                    tmp = -txn.amount
+                end
+                tmp
+            end
+            cur = curr + val
+        end
 
     end
 end
