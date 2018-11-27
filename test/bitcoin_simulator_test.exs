@@ -176,4 +176,38 @@ defmodule BitcoinSimulatorTest do
     assert User.get_lenght_of_chain("alice") == User.get_lenght_of_chain("alice") # check 3
   end
 
+  test "invalid transaction" do
+    User.start_link("alice") # please note that in all transactions are in terms of hashes i.e. public keys
+    User.start_link("bob") # anonymity is maintained, the names are for convinience
+
+    from = nil
+    {:ok, to_alice} = User.get_publickey("alice")
+    {:ok, to_bob} = User.get_publickey("bob")
+    amount = 10
+
+    txn_alice = Transaction.init(to_alice, from, amount)
+    txn_bob = Transaction.init(to_bob, from, amount)
+
+    # for starting the system, we are going to add a few blocks for giving starting credit to users
+    # data1 = Kernel.inspect(txn_alice)
+    {:ok, block} = User.mine_block("alice", txn_alice)
+    User.add_block("alice",block)
+    User.add_block("bob",block)
+
+    # data2 = Kernel.inspect(txn_bob)
+    {:ok, block} = User.mine_block("alice", txn_bob)
+    User.add_block("alice",block)
+    User.add_block("bob",block)
+
+    assert True == True
+
+    from = User.get_publickey("alice")
+    to = User.get_publickey("bob")
+    amount = 50
+
+    txn = Transaction.init(to, from, amount)
+    User.carryout_transaction("alice", txn)
+
+  end
+
 end
