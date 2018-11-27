@@ -14,16 +14,17 @@ defmodule Wallet do
         balance = Enum.each blockchain, fn block ->
             curr = 0
             data = block.data
-            val = Enum.each data fn txn ->
+            val = Enum.each data fn(txn) ->
                 tmp = 0
                 if txn.to == pub_key do
                     tmp = txn.amount
-                else if txn.from == pub_key
+                end
+                if txn.from == pub_key do
                     tmp = -txn.amount
                 end
                 tmp
             end
-            cur = curr + val
+            curr = curr + val
         end
 
     end
