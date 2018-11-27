@@ -73,7 +73,7 @@ defmodule User do
 
   def handle_call({:carryout_transaction, transaction}, _from, state) do
     wallet = Map.fetch!(state, :wallet)
-    amount = Map.fetch!(transaction, amount)
+    amount = Map.fetch!(transaction, :amount)
     if wallet.get_balance >= amount do
       {:ok}
     else
