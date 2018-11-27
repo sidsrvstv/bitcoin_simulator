@@ -28,13 +28,13 @@ defmodule PoolMine do
 
   def handle_call(:pool_mine, _from, state) do
     nonce = 0
-    {:ok, last_block} = get_latest_block(name)
-    previous_hash = Map.fetch!(last_block, :hash)
-    items = tx_data ++  [previous_hash]  # tx_data is [timestamp, data]
-    {:ok, block_pid} = BlockServer.start_link(items)
-    for i <- 0..length(state)-1 do
-      BlockServer.pool_mine(block_pid, {nonce + 100*i, _from})
-    end
+    # {:ok, last_block} = get_latest_block(name)
+    # previous_hash = Map.fetch!(last_block, :hash)
+    # items = tx_data ++  [previous_hash]  # tx_data is [timestamp, data]
+    # {:ok, block_pid} = BlockServer.start_link(items)
+    # for i <- 0..length(state)-1 do
+    #   BlockServer.pool_mine(block_pid, {nonce + 100*i, _from})
+    # end
     {:ok, :ok, state}
   end
 
