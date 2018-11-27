@@ -45,13 +45,13 @@ defmodule User do
     state is list of maps
   """
   def init(name) do
-    {:ok, name_sk} = RsaEx.generate_private_key
-    {:ok, name_pk} = RsaEx.generate_public_key(name_sk)
+    wallet = Wallet.init
+    # {:ok, name_sk} = RsaEx.generate_private_key
+    # {:ok, name_pk} = RsaEx.generate_public_key(name_sk)
 
-    {:ok, block_pid} = BlockChainServer.start_link(name_pk)
-    state = %{:sk => name_sk,
-              :pk => name_pk,
-              :blockchain => name_pk
+    {:ok, block_pid} = BlockChainServer.start_link(wallet.priv_key)
+    state = %{:wallet => wallet,
+              :blockchain => block_pid
     }
 
     {:ok, state}
