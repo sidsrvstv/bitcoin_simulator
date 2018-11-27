@@ -13,7 +13,7 @@ defmodule Wallet do
         blockchain = User.get_complete_blockchain(priv_key)
         balance = Enum.each blockchain, fn block ->
             curr = 0
-            data = block.data
+            data = Map.fetch!(block, :data)
             val = Enum.each data fn txn ->
                 tmp = 0
                 if txn.to == pub_key do
