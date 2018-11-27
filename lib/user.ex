@@ -19,7 +19,7 @@ defmodule User do
     end
   end
 
-  def get_header() do
+  def get_header(pub_key) do
     
   end
 
