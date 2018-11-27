@@ -160,20 +160,20 @@ defmodule BitcoinSimulatorTest do
     User.add_block("bob",block)
 
     assert True == True
-    # now we create a new transaction
+    now we create a new transaction
 
-    # from = User.get_user_publickey("alice")
-    # to = User.get_user_publickey("bob")
-    # amount = 5
+    from = User.get_user_publickey("alice")
+    to = User.get_user_publickey("bob")
+    amount = 5
 
-    # txn = Transaction.init(to, from, amount)
-    # User.carryout_transaction("alice", txn)
+    txn = Transaction.init(to, from, amount)
+    User.carryout_transaction("alice", txn)
 
-    # assert User.get_balance("alice") == 5   # check 1
+    assert User.get_balance("alice") == 5   # check 1
 
-    # assert User.get_balance("bob") == 15   # check 2
+    assert User.get_balance("bob") == 15   # check 2
 
-    # assert User.get_lenght_of_chain("alice") == User.get_lenght_of_chain("alice") # check 3
+    assert User.get_lenght_of_chain("alice") == User.get_lenght_of_chain("alice") # check 3
   end
 
 end

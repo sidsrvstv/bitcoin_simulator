@@ -83,7 +83,7 @@ defmodule User do
 
   def handle_call(:get_pk, _from, state) do
     wallet = Map.fetch!(state, :wallet)
-    pk = Map.fetch!(wallet, :priv_key)
+    pk = Map.fetch!(wallet, :pub_key)
     {:reply, {:ok, pk}, state}
   end
 
