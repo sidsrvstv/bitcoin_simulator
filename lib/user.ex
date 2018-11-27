@@ -73,8 +73,10 @@ defmodule User do
 
   def handle_call({:carryout_transaction, transaction}, _from, state) do
     wallet = Map.fetch!(state, :wallet)
+    pk = Map.fetch!(wallet, :pub_key)
+    sk = Map.fetch!(wallet, :priv_key)
     amount = Map.fetch!(transaction, :amount)
-    if wallet.get_balance >= amount do
+    if wallet.get_balance(pk, sk) >= amount do
       {:ok}
     else
       {:error, "insufficient balance"}
@@ -85,10 +87,6 @@ defmodule User do
     wallet = Map.fetch!(state, :wallet)
     pk = Map.fetch!(wallet, :pub_key)
     {:reply, {:ok, pk}, state}
-  end
-
-  def handle_call(:get_balance, _from, state) do
-
   end
 
   def handle_call({:add_block, block}, _from, state) do
