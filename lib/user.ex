@@ -19,6 +19,10 @@ defmodule User do
     end
   end
 
+  def get_header() do
+    
+  end
+
   def mine_block(name, transaction) do
     GenServer.call(via_tuple(name), {:mine_block, transaction})
   end
