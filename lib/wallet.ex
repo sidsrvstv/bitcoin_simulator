@@ -11,20 +11,22 @@ defmodule Wallet do
 
     def get_balance(pub_key, priv_key) do
         blockchain = User.get_complete_blockchain(priv_key)
+        IO.inspect blockchain
         balance = Enum.each blockchain, fn block ->
             curr = 0
             data = block.data
-            val = Enum.each data fn(txn) ->
-                tmp = 0
-                if txn.to == pub_key do
-                    tmp = txn.amount
-                end
-                if txn.from == pub_key do
-                    tmp = -txn.amount
-                end
-                tmp
-            end
-            curr = curr + val
+            IO.inspect data
+            # val = Enum.each data fn(txn) ->
+            #     tmp = 0
+            #     a = if txn.to == pub_key do
+            #         txn.amount
+            #     else if txn.from == pub_key
+            #         -txn.amount
+            #     end
+            #     tmp = tmp + a
+            # end
+            # curr = curr + val
+            0
         end
 
     end

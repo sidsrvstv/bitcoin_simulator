@@ -160,10 +160,10 @@ defmodule BitcoinSimulatorTest do
     User.add_block("bob",block)
 
     assert True == True
-    now we create a new transaction
+    #now we create a new transaction
 
-    from = User.get_user_publickey("alice")
-    to = User.get_user_publickey("bob")
+    from = User.get_publickey("alice")
+    to = User.get_publickey("bob")
     amount = 5
 
     txn = Transaction.init(to, from, amount)
