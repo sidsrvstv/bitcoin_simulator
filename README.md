@@ -1,3 +1,6 @@
+Siddharth Srivastava - 6316 6628
+Nanda Kishore - 6239 6049
+
 # BitcoinSimulator
 
 **Module description**
@@ -32,6 +35,5 @@ Each testcase has been given a meaningful header and comments have been added. W
 2. correctness of hashes
 3. transaction signatures and verifications
 4. createing transactions
-5. transaction scnerio betweent two parties
 
 

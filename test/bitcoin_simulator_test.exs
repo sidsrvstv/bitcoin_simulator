@@ -7,21 +7,9 @@ defmodule BitcoinSimulatorTest do
   end
 
   test "add transactions and check length of blockchain" do
-    {:ok, bob_sk} = RsaEx.generate_private_key
-    {:ok, bob_pk} = RsaEx.generate_public_key(bob_sk)
-
-    {:ok, charlie_sk} = RsaEx.generate_private_key
-    {:ok, charlie_pk} = RsaEx.generate_public_key(charlie_sk)
-
-    {:ok, alice_sk} = RsaEx.generate_private_key
-    {:ok, alice_pk} = RsaEx.generate_public_key(alice_sk)
-
-    tx1 = Transaction.init(bob_pk, alice_pk, 10)
-    tx2 = Transaction.init(alice_pk, charlie_pk, 20)
-    tx3 = Transaction.init(bob_pk, charlie_pk, 15)
-    # tx1 = ["from: Alice, to: Bob, amount = 10"]
-    # tx2 = ["seller: Alice, buyer: Charlie, amount = 20"]
-    # tx3 = ["seller: Bob, buyer: Charlie, amount = 15"]
+    tx1 = ["seller: Alice, buyer: Bob, amount = 10"]
+    tx2 = ["seller: Alice, buyer: Charlie, amount = 20"]
+    tx3 = ["seller: Bob, buyer: Charlie, amount = 15"]
 
     {:ok, block1} = BlockChainServer.mine_block("1", tx1) # mine block
     BlockChainServer.add_block("1",block1) # add block to blockchain
@@ -38,14 +26,7 @@ defmodule BitcoinSimulatorTest do
   end
 
   test "correctness of hashes" do
-    {:ok, bob_sk} = RsaEx.generate_private_key
-    {:ok, bob_pk} = RsaEx.generate_public_key(bob_sk)
-
-    {:ok, charlie_sk} = RsaEx.generate_private_key
-    {:ok, charlie_pk} = RsaEx.generate_public_key(charlie_sk)
-
-    tx = Transaction.init(charlie_pk, bob_pk, 10)
-    #tx = ["seller: Bob, buyer: Charlie, amount = 10"]
+    tx = ["seller: Bob, buyer: Charlie, amount = 10"]
     {:ok, block} = BlockChainServer.mine_block("1", tx)
     BlockChainServer.add_block("1",block)
 
@@ -64,14 +45,7 @@ defmodule BitcoinSimulatorTest do
   end
 
   test "calculated hash is same as stored hash" do
-    {:ok, bob_sk} = RsaEx.generate_private_key
-    {:ok, bob_pk} = RsaEx.generate_public_key(bob_sk)
-
-    {:ok, charlie_sk} = RsaEx.generate_private_key
-    {:ok, charlie_pk} = RsaEx.generate_public_key(charlie_sk)
-
-    tx = Transaction.init(charlie_pk, bob_pk, 10)
-    # tx = ["seller: Bob, buyer: Charlie, amount = 10"]
+    tx = ["seller: Bob, buyer: Charlie, amount = 10"]
     {:ok, block} = BlockChainServer.mine_block("1", tx)
     BlockChainServer.add_block("1",block)
 
@@ -140,7 +114,7 @@ defmodule BitcoinSimulatorTest do
     User.start_link("alice") # please note that in all transactions are in terms of hashes i.e. public keys
     User.start_link("bob") # anonymity is maintained, the names are for convinience
 
-    from = nil
+    from = "None"
     {:ok, to_alice} = User.get_publickey("alice")
     {:ok, to_bob} = User.get_publickey("bob")
     amount = 10
@@ -159,21 +133,7 @@ defmodule BitcoinSimulatorTest do
     User.add_block("alice",block)
     User.add_block("bob",block)
 
-    assert True == True
-    #now we create a new transaction
-
-    from = User.get_publickey("alice")
-    to = User.get_publickey("bob")
-    amount = 5
-
-    txn = Transaction.init(to, from, amount)
-    User.carryout_transaction("alice", txn)
-
-    assert User.get_balance("alice") == 5   # check 1
-
-    assert User.get_balance("bob") == 15   # check 2
-
-    assert User.get_lenght_of_chain("alice") == User.get_lenght_of_chain("alice") # check 3
+    assert User.get_lenght_of_chain("alice") == User.get_lenght_of_chain("bob")
   end
 
 end
