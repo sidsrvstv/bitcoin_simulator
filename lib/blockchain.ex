@@ -31,7 +31,7 @@ defmodule BlockChainServer do
   def mine_block(name, tx_data) do
     {:ok, last_block} = get_latest_block(name)
     previous_hash = Map.fetch!(last_block, :hash)
-    items = [tx_data] ++  [previous_hash]  # tx_data is [timestamp, data]
+    items = tx_data ++  [previous_hash]  # tx_data is [timestamp, data]
     {:ok, new_block_pid} = BlockServer.start_link(items)
     GenServer.call(via_tuple(name), {:mine_block, new_block_pid}, 100_000)
   end

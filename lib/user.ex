@@ -8,48 +8,41 @@ defmodule User do
   @doc """
     start the user actor
   """
-  def start_link(name) do
-    GenServer.start_link(__MODULE__, name, name: via_tuple(name))
+  def start_link({public_key, private_key}) do
+    GenServer.start_link(__MODULE__, {public_key, private_key}, name: via_tuple(public_key))
   end
 
-  def carryout_transaction(name, transaction) do
-    case GenServer.call(via_tuple(name), {:carryout_transaction, transaction}) do
-      {:error, message} -> IO.puts message
-      {:ok} ->  mine_block(name, transaction)
-    end
+  def create_transaction(public_key, transaction) do
+    GenServer.call(via_tuple(public_key), {:create_transaction, transaction, public_key})
   end
 
-  def get_latest_block(name) do
-    GenServer.call(via_tuple(name), :get_latest_block)
+  def get_latest_block(public_key) do
+    GenServer.call(via_tuple(public_key), :get_latest_block)
   end
 
-  def add_block(name, block) do
-    GenServer.call(via_tuple(name), {:add_block, block})
+  def add_block(public_key, block) do
+    GenServer.call(via_tuple(public_key), {:add_block, block})
   end
 
-  def mine_block(name, transaction) do
-    GenServer.call(via_tuple(name), {:mine_block, transaction})
+  def mine_block(public_key, transaction) do
+    GenServer.call(via_tuple(public_key), {:mine_block, transaction})
   end
 
-  def get_publickey(name) do
-    GenServer.call(via_tuple(name), :get_pk)
-  end
-
-  def get_balance(name) do
-    {:ok, balance} = GenServer.call(via_tuple(name), :get_balance)
+  def get_balance(public_key) do
+    {:ok, balance} = GenServer.call(via_tuple(public_key), {:get_balance, public_key})
     balance
   end
 
-  def get_complete_blockchain(name) do
-    GenServer.call(via_tuple(name), :get_blockchain)
+  def get_complete_blockchain(public_key) do
+    GenServer.call(via_tuple(public_key), :get_blockchain)
   end
 
-  def get_lenght_of_chain(name) do
-    GenServer.call(via_tuple(name), :get_chainlength)
+  def get_lenght_of_chain(public_key) do
+    GenServer.call(via_tuple(public_key), :get_chainlength)
   end
 
-  defp via_tuple(name) do
-    {:via, :gproc, {:n, :l, {:user_name, name}}}
+  defp via_tuple(public_key) do
+    {:via, :gproc, {:n, :l, {:user_name, public_key}}}
   end
 
   #------------#
@@ -60,27 +53,22 @@ defmodule User do
     initialize one blockchain, the first block called the genesis block is put in place
     state is list of maps
   """
-  def init(name) do
-    wallet = Wallet.init
+  def init({_public_key, private_key}) do
 
-    {:ok, block_pid} = BlockChainServer.start_link(wallet.priv_key)
-    state = %{:wallet => wallet,
-              :blockchain => wallet.priv_key
+    BlockChainServer.start_link(private_key)
+    state = %{:sent_vote => 0,
+              :blockchain => private_key
     }
 
     {:ok, state}
   end
 
-  def handle_call({:carryout_transaction, transaction}, _from, state) do
-    wallet = Map.fetch!(state, :wallet)
-    pk = Map.fetch!(wallet, :pub_key)
-    sk = Map.fetch!(wallet, :priv_key)
-    amount = Map.fetch!(transaction, :amount)
-    if Wallet.get_balance(pk, sk) >= amount do
-      {:ok}
-    else
-      {:error, "insufficient balance"}
-    end
+  def handle_call({:create_transaction, transaction, public_key}, _from, state) do
+    customer = Map.fetch!(transaction, :from)
+    reward = Transaction.init(public_key, "None", 10) # init(to, from, amount) # reward not from any user
+    fee = Transaction.init(public_key, customer, 0.1) # init(to, from, amount)
+    data = [transaction, reward, fee]
+    {:reply, {:ok, data}, state}
   end
 
   def handle_call(:get_pk, _from, state) do
@@ -97,7 +85,6 @@ defmodule User do
 
   def handle_call({:mine_block, transaction}, _from, state) do
     id = Map.fetch!(state, :blockchain)
-    IO.inspect id
     {:ok, block} = BlockChainServer.mine_block(id, transaction)
     {:reply, {:ok, block}, state}
   end
@@ -118,6 +105,27 @@ defmodule User do
     id = Map.fetch!(state, :blockchain)
     {:ok, block} = BlockChainServer.get_latest_block(id)
     {:reply, {:ok, block}, state}
+  end
+
+  def handle_call({:get_balance, public_key}, _from, state) do
+    id = Map.fetch!(state, :blockchain )
+    blockchain = BlockChainServer.get_full_chain(id) # list of blocks or maps
+    balance = for i <- 1..length(blockchain) - 1 do
+      block = Enum.at(blockchain, i)
+      data = Map.fetch!(block, :data)
+      cur_sum = for i <- 0..length(data) -1 do
+        txn = Enum.at(data, i)
+        add = if Map.fetch!(txn, :to) == public_key do
+          Map.fetch!(txn, :amount)
+        end
+        sub = if Map.fetch!(txn, :from) == public_key do
+          Map.fetch!(txn, :amount) * -1
+        end
+        add + sub
+      end
+      Enum.sum(cur_sum)
+    end
+    {:reply, {:ok, Enum.sum(balance)}, state}
   end
 
 end

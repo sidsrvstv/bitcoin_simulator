@@ -35,10 +35,10 @@ defmodule BlockServer do
     {:ok, state}
   end
 
-  def pool_mine(block_pid, nonce) do
-    {:ok, "block mined", state} = GenServer.cast(block_pid, {:mine_block, nonce})
-    {:ok, state}
-  end
+  # def pool_mine(block_pid, nonce) do
+  #   {:ok, "block mined", state} = GenServer.cast(block_pid, {:mine_block, nonce})
+  #   {:ok, state}
+  # end
 
 
   #------------#
