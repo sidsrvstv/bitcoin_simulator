@@ -8,29 +8,86 @@ defmodule BitcoinSimulator do
   """
   def main do
     total_users = System.argv()
-    if is_integer(total_users) do
-      total_users
-      |> launch_network()
-    else
-      IO.puts "Number of users should be integer"
+    case total_users do
+      [n] -> create_users(n)
+      _ -> IO.puts "Wrong arguments"
     end
-
   end
 
   @doc """
   generate public, private keys for all users
   launch users with alias as public key
   store all public keys in a list
+  create empty transactions for miners to mine and introduce bitcoin in system
   """
-  def launch_network(n) do
-    public_keys = for i <- 1..n do
+  def create_users(users) do
+    n = String.to_integer(users)
+    public_keys = for _ <- 1..n do
       wallet = Wallet.init
       pub_key = Map.fetch!(wallet, :pub_key)
       priv_key = Map.fetch!(wallet, :priv_key)
       User.start_link({pub_key, priv_key})
       pub_key
     end
+    Topology.start_link(public_keys)  # this actor can be reached out for list of user keys and neighbors
+    create_transactions()
+  end
 
+  @doc """
+  first create a set of empty transactions, users who mine it get some BTC and thats how BTC
+  is introduced in the system
+  Next a set of transactions are introduced between random users, amount is fixed as of now
+  System exits after the designated number of transactions are completed
+  """
+  def create_transactions do
+    nodes = Topology.get_all_nodes()
+
+    Consensus.start_link()
+    BlockChainServer.start_link()
+
+    introduce_bitcoins(nodes)
+
+    number_of_transactions = 10
+
+    for _ <- 1..number_of_transactions do
+      from = Enum.random(nodes)
+      to = Enum.random(nodes)
+      amount = :rand.uniform(1)
+      transaction = Transaction.init(to, from, amount)
+      User.get_balance(from)
+      # exit(:shutdown)
+      if User.get_balance(from) < amount do
+        IO.puts "Not enough balance for #{transaction}"
+      else
+        if from != to do
+          broadcast_transaction(transaction)
+        end
+      end
+      Consensus.reset()
+    end
+    # IO.inspect BlockChainServer.get_full_chain()
+    IO.puts "Show's over !! Its been a pleasure !!!"
+  end
+
+  def broadcast_transaction(transaction) do
+    nodes = Topology.get_all_nodes()
+    Enum.each nodes, fn(key) ->
+      User.handle_transaction(key, transaction)
+    end
+  end
+
+  def introduce_bitcoins(nodes) do
+    Enum.each nodes, fn(key) ->
+      from =  nil
+      to = key
+      amount = 50
+      transaction = Transaction.init(to, from, amount)
+      reward = Transaction.init(nil, nil, 0)
+      fee = Transaction.init(nil, nil, 0)
+      data = [transaction, reward, fee]
+      {:ok, block} = BlockChainServer.mine_block(data)
+      BlockChainServer.add_block(block)
+    end
   end
 
 end

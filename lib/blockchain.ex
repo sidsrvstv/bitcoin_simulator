@@ -8,15 +8,15 @@ defmodule BlockChainServer do
   @doc """
     start the BlockChain server
   """
-  def start_link(name) do
-    GenServer.start_link(__MODULE__, [], name: via_tuple(name))
+  def start_link() do
+    GenServer.start_link(__MODULE__, [], name: :blockchain)
   end
 
   @doc """
     returns the state of the block on top of chain
   """
-  def get_latest_block(name) do
-    GenServer.call(via_tuple(name), :get_last)
+  def get_latest_block() do
+    GenServer.call(:blockchain, :get_last)
   end
 
   @doc """
@@ -24,41 +24,51 @@ defmodule BlockChainServer do
     new block is initialized with the data
     block is mined and then added to the top of chain
   """
-  def add_block(name, block) do
-    GenServer.call(via_tuple(name), {:add_block, block})
+  def add_block(block) do
+    GenServer.call(:blockchain, {:add_block, block})
+    write_transaction_to_file(block)
   end
 
-  def mine_block(name, tx_data) do
-    {:ok, last_block} = get_latest_block(name)
+  def mine_block(tx_data) do
+    {:ok, last_block} = get_latest_block()
     previous_hash = Map.fetch!(last_block, :hash)
-    items = tx_data ++  [previous_hash]  # tx_data is [timestamp, data]
-    {:ok, new_block_pid} = BlockServer.start_link(items)
-    GenServer.call(via_tuple(name), {:mine_block, new_block_pid}, 100_000)
-  end
-
-  @doc """
-    checks the validity of the blockchain by recalculating hash and matching it with the one stored
-    if value has been modified in the middle, the hash which depends upon previous hash too will now
-    be different than the one stored making the blockchain invalid
-  """
-  def is_chain_valid(name) do
-    {:ok, answer} = GenServer.call(via_tuple(name), :is_chain_valid)
-    answer
-  end
-
-  def get_lenght_of_chain(name) do
-    GenServer.call(via_tuple(name), :get_length)
-  end
-
-  def get_full_chain(name) do
-    GenServer.call(via_tuple(name), :get_full_chain)
-  end
-
-  defp via_tuple(name) do
-    {:via, :gproc, {:n, :l, {:user_name, name}}}
+    GenServer.call(:blockchain, {:mine_block, {tx_data, previous_hash}}, 100_000)
   end
 
 
+  def get_lenght_of_chain() do
+    GenServer.call(:blockchain, :get_length)
+  end
+
+  def get_full_chain() do
+    GenServer.call(:blockchain, :get_full_chain)
+  end
+
+  def write_transaction_to_file(block) do
+    data = Map.fetch!(block, :data)
+    # IO.inspect data
+    filename = "transactions.txt"
+    for i <- 0..length(data)-1 do
+      if i == 0 do
+        File.write(filename, "Transaction:\n", [:append])
+      end
+      if i == 1 do
+        File.write(filename, "Reward:\n", [:append])
+      end
+      if i == 2 do
+        File.write(filename, "Fee:\n", [:append])
+      end
+      tx = Enum.at(data, i)
+      to = Map.fetch!(tx, :to)
+      from = Map.fetch!(tx, :from)
+      amount = Map.fetch!(tx, :amount)
+      File.write(filename, "To: #{to}\n", [:append])
+      File.write(filename, "From: #{from}\n", [:append])
+      File.write(filename, "Amount: #{amount}\n", [:append])
+      File.write(filename, "\n\n", [:append])
+    end
+    File.write(filename, "=================================================\n\n", [:append])
+  end
 
   #------------#
   # Server API #
@@ -69,9 +79,9 @@ defmodule BlockChainServer do
     state is list of maps
   """
   def init(_) do
-    {:ok, block_pid} = BlockServer.start_link(["Genesis Block", "0"])
-    {:ok, state} = BlockServer.get_block_info(block_pid)
-
+    # {:ok, block_pid} = BlockServer.start_link(["Genesis Block", "0"])
+    # {:ok, state} = BlockServer.get_block_info(block_pid)
+    state = Block.init(["Genesis Block", "0"])
     {:ok, [state]}
   end
 
@@ -87,36 +97,16 @@ defmodule BlockChainServer do
     {:reply, {:ok, state}, state}
   end
 
-  def handle_call(:is_chain_valid, _from, state) do
-    result = %{:final => True}
-    for i <- 1..length(state)-1 do
-      current_block = Enum.at(state, i)
-
-
-      c_data = Map.fetch!(current_block, :data)
-      c_previoushash = Map.fetch!(current_block, :previous_hash)
-      c_nonce = Map.fetch!(current_block, :nonce)
-      items = [c_data, c_previoushash, c_nonce]
-
-      previous_block = Enum.at(state, i-1)
-
-      if Map.fetch!(current_block, :hash) != Utils.calculate_hash(items) do
-        Map.update!(result, :final, &(&1 = False))
-      end
-      if Map.fetch!(current_block, :previous_hash) != Map.fetch!(previous_block, :hash) do
-        Map.update!(result, :final, &(&1 = False))
-      end
-    end
-    {:reply, {:ok, Map.fetch!(result, :final)}, state}
-  end
-
   def handle_call({:add_block, block}, _from, state) do
+    # IO.inspect "reached till blochchain"
     new_state = state ++ [block]
+    # IO.puts "blockchain-->"
+    # IO.inspect new_state
     {:reply, :ok, new_state }
   end
 
-  def handle_call({:mine_block, block_pid}, _from, state) do
-    {:ok, new_block} = BlockServer.mine_block(block_pid)  # spend time to mine block
+  def handle_call({:mine_block, {data, previous_hash}}, _from, state) do
+    {:ok, new_block} = Block.mine_block([data, previous_hash])  # spend time to mine block
     {:reply, {:ok, new_block}, state }
   end
 

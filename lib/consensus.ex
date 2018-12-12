@@ -3,43 +3,42 @@ defmodule Consensus do
 
   # SERVER API
 
-  def start_link(args) do
-    GenServer.start_link(__MODULE__,args , name: :consensus)
+  def start_link do
+    GenServer.start_link(__MODULE__,[] , name: :consensus)
   end
 
-  def send_vote( {public_key, block} ) do
-    GenServer.call(:consensus, {:udpate_vote, public_key, block})
+  @doc """
+  receives votes from all users in the form of tuple
+  {public_key, block}
+  """
+  def send_vote( public_key, block ) do
+    GenServer.call(:consensus, {:update_vote, public_key, block }, 1000_000 )
   end
 
-  def get_voter_count do
-    GenServer.call(:consensus, :get_voter_count)
+  def reset() do
+    GenServer.call(:consensus, :reset)
   end
-
-  def get_winner do
-    GenServer.call(:consensus, :get_poll_winner)
-  end
-
 
   # CLIENT API
   def init(_) do
+    Process.flag(:trap_exit, true)
     state = %{:max_votes => 0,
-              :block => ""
+              :vote_count => 0,
+              :block => nil
     }
     {:ok, state}
   end
 
-  def handle_call(:get_voter_count, _from, state) do
-    {:reply, {:ok, length(Map.keys(state))}, state}
-  end
-
-  def handle_call(:get_winner, _from, state) do
-    {:reply, {:ok, Map.fetch!(state, :block)}, state}
+  def handle_info(:kill_me, state) do
+    {:stop, :normal, state}
   end
 
   @doc """
   updating the vote count in state for corresponding public key
+  if no of votes has equalled no of users, that is vote has come from all,
+  get winner and broadcast
   """
-  def handle_call({:update_vote, public_key, block}, _from, state) do
+  def handle_call({:update_vote, public_key, block } , _from, state) do
     new_state = if Map.has_key?(state, public_key) do
       public_key_map = Map.fetch!(state, public_key) # get the map of public key
       count = Map.fetch!(public_key_map, :count) # get the value of count from the above map, this is a nested map
@@ -55,7 +54,7 @@ defmodule Consensus do
       end
       state1
     else
-      new_map = %{public_key => %{:count => 1, :block => block }} # create a new map with count and block keys
+      new_map = %{:count => 1, :block => block } # create a new map with count and block keys
       s1 = Map.put(state, public_key, new_map) # put it in state map
       max_till_now = Map.fetch!(state, :max_votes)
       state1 = if 1 > max_till_now do
@@ -67,11 +66,23 @@ defmodule Consensus do
       end
       state1
     end
+    current_count = Map.fetch!(new_state, :vote_count) # checking how many votes cast
+    final_state = Map.put(new_state, :vote_count, current_count + 1) # increasing the number of votes received
+    if current_count + 1 == Topology.get_number_of_nodes() do # need to end when everyone cast their vote
+      winner = Map.fetch!(state, :block)
+      BlockChainServer.add_block(winner)
+    end
 
-    {:reply, {:ok}, new_state}
+    {:reply, :ok, final_state}
   end
 
+  def handle_call(:reset, _from, _state) do
+    r_state = %{:max_votes => 0,
+                  :vote_count => 0,
+                  :block => nil
+      }
 
-
+    {:reply, :ok, r_state}
+  end
 
 end
