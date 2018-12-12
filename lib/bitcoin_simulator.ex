@@ -75,7 +75,8 @@ defmodule BitcoinSimulator do
   end
 
   def broadcast_transaction(transaction) do
-    nodes = Topology.get_all_nodes()
+    n = Topology.get_all_nodes()
+    nodes = Enum.shuffle(n)
     Enum.each nodes, fn(key) ->
       User.handle_transaction(key, transaction)
     end

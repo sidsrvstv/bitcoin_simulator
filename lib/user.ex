@@ -94,7 +94,7 @@ defmodule User do
     end
     r_key = Map.fetch!(new_state, :r_key)
     r_block = Map.fetch!(new_state, :r_block)
-    Consensus.send_vote(r_key, r_block)
+    Consensus.send_vote(r_key, r_block, public_key)
     state1 = Map.put(new_state, :r_key, nil) # reset after voting
     state2 = Map.put(state1, :r_block, nil)
 

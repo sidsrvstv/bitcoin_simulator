@@ -18,6 +18,7 @@ defmodule Block do
 
   def mine_block([data, previous_hash]) do
     nonce = 0
+    # nonce = :rand.uniform(10000)
     difficulty = 2
     state = Block.init([data, previous_hash])
 
