@@ -49,7 +49,7 @@ defmodule BitcoinSimulator do
 
     number_of_transactions = 10
 
-    for _ <- 1..number_of_transactions do
+    for j <- 1..number_of_transactions do
       from = Enum.random(nodes)
       to = Enum.random(nodes)
       amount = :rand.uniform(1)
@@ -61,6 +61,9 @@ defmodule BitcoinSimulator do
       else
         if from != to do
           broadcast_transaction(transaction)
+          IO.puts "Transaction no #{j} done"
+        else
+          IO.puts "Transaction no #{j} was invalid"
         end
         print_user_balance(nodes)
       end
