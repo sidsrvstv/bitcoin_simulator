@@ -65,8 +65,9 @@ defmodule BitcoinSimulator do
       end
       Consensus.reset()
     end
-    # IO.inspect BlockChainServer.get_full_chain()
-    IO.puts "Show's over !! Its been a pleasure !!!"
+    IO.inspect BlockChainServer.get_lenght_of_chain()
+    IO.inspect BlockChainServer.get_full_chain()
+    IO.puts "All Transactions are over\n"
   end
 
   def broadcast_transaction(transaction) do

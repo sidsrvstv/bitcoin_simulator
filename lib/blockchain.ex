@@ -50,13 +50,16 @@ defmodule BlockChainServer do
     filename = "transactions.txt"
     for i <- 0..length(data)-1 do
       if i == 0 do
-        File.write(filename, "Transaction:\n", [:append])
+        File.write(filename, "Transaction=\n", [:append])
+        File.write(filename, "------------\n", [:append])
       end
       if i == 1 do
-        File.write(filename, "Reward:\n", [:append])
+        File.write(filename, "Reward=\n", [:append])
+        File.write(filename, "------------\n", [:append])
       end
       if i == 2 do
-        File.write(filename, "Fee:\n", [:append])
+        File.write(filename, "Fee=\n", [:append])
+        File.write(filename, "------------\n", [:append])
       end
       tx = Enum.at(data, i)
       to = Map.fetch!(tx, :to)
