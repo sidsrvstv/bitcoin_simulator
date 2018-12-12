@@ -62,11 +62,12 @@ defmodule BitcoinSimulator do
         if from != to do
           broadcast_transaction(transaction)
         end
+        print_user_balance(nodes)
       end
       Consensus.reset()
     end
-    IO.inspect BlockChainServer.get_lenght_of_chain()
-    IO.inspect BlockChainServer.get_full_chain()
+    # IO.inspect BlockChainServer.get_lenght_of_chain()
+    # IO.inspect BlockChainServer.get_full_chain()
     IO.puts "All Transactions are over\n"
   end
 
@@ -89,6 +90,15 @@ defmodule BitcoinSimulator do
       {:ok, block} = BlockChainServer.mine_block(data)
       BlockChainServer.add_block(block)
     end
+  end
+
+  def print_user_balance(nodes) do
+    filename = "user_balance.txt"
+    Enum.each nodes, fn(key) ->
+      balance = User.get_balance(key)
+      File.write(filename, "#{key} ====== #{balance}\n", [:append])
+    end
+    File.write(filename, "=================================================\n\n", [:append])
   end
 
 end
