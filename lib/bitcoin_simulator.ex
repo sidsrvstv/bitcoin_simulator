@@ -9,7 +9,7 @@ defmodule BitcoinSimulator do
   def main do
     total_users = System.argv()
     case total_users do
-      [n, x] -> create_users(n,x)
+      [n] -> create_users(n)
       _ -> IO.puts "Wrong arguments"
     end
   end
@@ -20,7 +20,7 @@ defmodule BitcoinSimulator do
   store all public keys in a list
   create empty transactions for miners to mine and introduce bitcoin in system
   """
-  def create_users(users, number_txn) do
+  def create_users(users) do
     n = String.to_integer(users)
     public_keys = for _ <- 1..n do
       wallet = Wallet.init
@@ -30,7 +30,7 @@ defmodule BitcoinSimulator do
       pub_key
     end
     Topology.start_link(public_keys)  # this actor can be reached out for list of user keys and neighbors
-    create_transactions(number_txn)
+    create_transactions()
   end
 
   @doc """
@@ -39,7 +39,7 @@ defmodule BitcoinSimulator do
   Next a set of transactions are introduced between random users, amount is fixed as of now
   System exits after the designated number of transactions are completed
   """
-  def create_transactions(x) do
+  def create_transactions() do
     nodes = Topology.get_all_nodes()
 
     Consensus.start_link()
@@ -47,7 +47,7 @@ defmodule BitcoinSimulator do
 
     introduce_bitcoins(nodes)
 
-    number_of_transactions = String.to_integer(x)
+    number_of_transactions = 10
 
     for j <- 1..number_of_transactions do
       from = Enum.random(nodes)
