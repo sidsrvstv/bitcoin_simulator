@@ -42,9 +42,9 @@ To run the tests, please use the following command
 $> mix test test/bitcoin_simulator_test.exs 
 
 To start the simulation, please run the system as follows
-$> mix run lib/bitcoin_simulator.ex 100
+$> mix run lib/bitcoin_simulator.ex 100 1000
 
-Where the first argument is the number of Users desired in the application. Also, the number of transactions have been hardcoded as 1000.
+Where the first argument is the number of Users desired in the application. Also, the second argument is the number of transactions which is 1000 in the example above.
 After 1000 transactions, the app exits. 
 We also output several files to help the user see the results like 
 	- transaction.txt which consists of every transaction that was valid. 
