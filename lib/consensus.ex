@@ -12,6 +12,7 @@ defmodule Consensus do
   {public_key, block}
   """
   def send_vote( public_key, block, voter_key ) do
+    # IO.inspect voter_key
     GenServer.call(:consensus, {:update_vote, public_key, block, voter_key }, 1000_000 )
   end
 

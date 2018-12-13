@@ -118,10 +118,10 @@ defmodule User do
   end
 
   defp create_transaction(public_key, transaction) do
-    customer = Map.fetch!(transaction, :from)
-    amount  = Map.fetch!(transaction, :amount)
+    tx_from = Map.fetch!(transaction, :from)
+    tx_amount  = Map.fetch!(transaction, :amount)
     reward = Transaction.init(public_key, "None", 10) # init(to, from, amount) # reward not from any user
-    fee = Transaction.init(public_key, customer, amount / 10) # init(to, from, amount)
+    fee = Transaction.init(public_key, tx_from, tx_amount / 10) # init(to, from, amount)
     data = [transaction, reward, fee]
     {:ok, data}
   end

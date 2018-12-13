@@ -1,31 +1,36 @@
+
 Siddharth Srivastava - 6316 6628
 Nanda Kishore - 6239 6049
 
 # BitcoinSimulator
 
-**Module description**
+**Distributed Protocol description**
 
-The module `User` creates an actor(GenServer) for User. Its state has its wallet and starts a blockchain server (another GenServer). All the methods of BlockChain server are accesed through User. 
+Each user is a GenServer actor, and all of them are miners in our system. We decide which block gets added to the blockchain by holding a vote, thus establishing a distributed consensus. 
 
-The module `BlockChainServer` is a GenServer for BlockChain. Every user has its own BlockChainServer instance. Its initial state is the genesis block. It is a list of Block servers.
-
-The module `Block` is a GenServer which forms the primary data structure in our system. Its initial state is basically a map which contains, `data` which is a list of `Transaction` objects. `Data` is made of original transaction, miner reward and miner transaction fees. `Block` also contains a key for hash to previous block, a key to store hash of its self, and a key for storing the nonce value.
+Everytime a transaction starts, it is broadcasted to all users and they would start mining. The Users check if they have received a message in their mailbox regarding someone else mining before them, if yes, they would discard their block. A voting is done to decide which block has reached the most users. This voting is overlooked by the actor `Consensus`, which decides the winner and the winning block is broadcasted to be added to the BlockChain. 
 
 
-The module `Transaction` creates a struct for the transaction. This struct holds public key of the recipient in `to` and public key of the sender in `from` and the number of bitcoins being transferred in `amount`. This module also has methods to sign a transaction and verify a signed transaction.
+**Module Description**
 
-The module `Wallet` creates a struct for the wallet. This struct hold the public key and private key of the user to whom this wallet belongs in `pub_key` and `priv_key`. The module also has a method to get balance of the user by parsing the entire blockchain and calculating his balance.
+In addition to User, BlockChain, Block, Transaction and Wallet modules, we introduce two new module called Topology and Consensus. It is an actor (GenServer) which contains all the public keys and can be accessed for getting a list of all keys, all neighboring keys (neighbors of a user). We use a full network topology, which implies that all users are connected to all other users. 
+Consensus helps overlook voting for a particular transaction.
 
-Unit Test description
-1) add transactions and check length of blockchain : This unit test creates three users. It creates some transactions among these users and user mine these transaction and checks the length of the blockchain.
-2) correctness of hashes: This unit test creates two users and adds a transaction between them and mines the transaction. It then checks the correctness of the hash i.e., if the number of zeros are correct.
-3) calculated hash is same as stored hash : This unit test creates two users and adds a transaction between them and mines the transaction. It then independently calculates the hash and checks if this is same as that in the block.
-4) transaction signature and verification : This unit test creates a transaction, signs it and verifies if the signature is valid.
-5) creating transaction : This unit test creates a transaction and check if the transaction has all object as per what we have given it.
-6) wallet keys : This unit test create a wallet object and checks if private key and corresponding public are created.
-7) "transaction scenario 1": This is scenerio test that creats two users, gives them an intial balance and creates a transaction between them and verifies the balance and block chain.
-8) "invalid transaction" : This is scenerio test that creats two users, gives them an intial balance and creates an invalid transaction between them.
-## Installation
+A brief description of the modules is as follows:
+
+`Transaction` : The Transaction data strucure consisting of `from`, `to` and `amount` fields. 
+`Wallet` : Responsible for generating public and private keys for users.
+`Block` : A single unit of transaction, its a map which contains keys `data` which contains the transaction details consisting of orginal transaction, miner reward and transaction fee information. Miner reward and Transaction fees are `Transaction` type objects.
+`BlockChain` : A list of Blocks
+`User` : All users are genservers. A user is accessed through its public key. It is responsible for creating its own transaciton data, mining and broadcasting to all users messages and blocks.
+`Consensus`: A GenServer which keeps tally of votes for every transaction. Every vote is a tuple of public_key and block which all users have received in their mailbox for a particular transaction. The winner of the voting is added to the blockchain. In case of ties, the block which had reached the consensus actor first is the winner
+`Topology`: It maintains the network connection. It can be accessed to get list of all users keys and neigbors for a particular user.
+
+
+All user balances are calculated by traversing the blockchain, no seperate fields for account balance are maintained. 
+
+
+## Installation and Running
 
 Please run the following commands to run the application
 $> mix deps.get
@@ -33,16 +38,32 @@ The above command because our app uses two dependencies, gproc and rsaex
 
 $> mix compile
 
+To run the tests, please use the following command
+$> mix test test/bitcoin_simulator_test.exs 
 
-$> mix test
+To start the simulation, please run the system as follows
+$> mix run lib/bitcoin_simulator.ex 100
+
+Where the first argument is the number of Users desired in the application. Also, the number of transactions have been hardcoded as 1000.
+After 1000 transactions, the app exits. 
+We also output several files to help the user see the results like 
+	- transaction.txt which consists of every transaction that was valid. 
+	- user_balance.txt which contains balance of all users after every valid transaction
+	- miner_name.txt which tells which user was the miner for every valid transaction
+
 
 
 ## TestCase description
 
-Each testcase has been given a meaningful header and comments have been added. We have added testcases to check 
-1. transactions being added to blockchain
-2. correctness of hashes
-3. transaction signatures and verifications
-4. createing transactions
+All users start with an initial balance of 50 BTC. These have been accounted for in the BlockChain.
+
+1. "transaction between two parties with from user as miner" : This testcase has two users as transacting parties. Here I have deliberately given the transaction to one user later than the other to show the miner reward and the transaction fee. In this testcase, the `from` user is also the miner and gets the mining reward of 10BTC, is also charged a transaction fee of 10% of transaction amount but since it is the miner, it gets the fee back. The calculation has been shown in the comments for easier understanding.
+
+2. "transaction between two parties with to user as miner" : This testcase is the same as above but with the miner changed from `from` user to `to` user. The calculation has been shown in the comments for easier understanding.
+
+3. "transaction between multiple parties" : In this testcase, I hold a transaction between two parties but two others also present as miners. A non transacting party has been delibertely made to mine and the resulting balances of all 4 users have been shown. The calculation is present in the comments of the test case for understanding and verification.
+
+4. "multiple transactions between multiple parties" : Here we show 2 transactions between 4 parties. The miners are deliberately made different. Calculations have been written down in comments for verification. 
+
 
 
