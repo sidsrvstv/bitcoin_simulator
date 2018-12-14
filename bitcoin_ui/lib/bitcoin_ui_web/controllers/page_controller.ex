@@ -31,6 +31,13 @@ defmodule BitcoinUiWeb.PageController do
     |> File.read!)
   end
 
+  def total(conn, _params) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Application.app_dir(:bitcoin_ui, "priv/data/tot_bitcoin.json")
+    |> File.read!)
+  end
+
   def show(conn, %{"messenger" => messenger}) do
     render(conn, "show.html", messenger: messenger)
   end

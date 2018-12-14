@@ -15,9 +15,9 @@
 </style>
 <body>
 
-    <button id="renderBtn">
+    <%# <button id="renderBtn">
         Render
-    </button>
+    </button> %>
     <div class="container">
         <canvas id="myChart"></canvas>
     </div>
@@ -26,6 +26,9 @@
     </div>
     <div class="container">
         <canvas id="nonceChart"></canvas>
+    </div>
+    <div class="container">
+        <canvas id="totalChart"></canvas>
     </div>
 
 </body>

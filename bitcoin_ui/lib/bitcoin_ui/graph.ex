@@ -22,10 +22,25 @@ defmodule Graph do
         GenServer.call(:graph, {:nonce, data})
     end
 
+    def tot_bitcoins(data) do
+        GenServer.call(:graph, {:tot_bit, data})
+    end
+
     def init(_) do
-        state = %{ :transactions => [], :balance => Map.new(), :nonce => [], :counter => 1}
+        state = %{ :tot_bit_arr => [], :transactions => [], :balance => Map.new(), :nonce => [], :counter => 1}
 
         {:ok, state}
+    end
+
+    def handle_call({:tot_bit, data}, _from, state) do
+        obj = %Coord{x: :os.system_time(:milli_seconds), y: data}
+        state = Map.put(state, :tot_bit_arr, state.tot_bit_arr ++ [obj])
+
+        IO.inspect state.tot_bit_arr
+
+        File.write("./priv/data/tot_bitcoin.json", Poison.encode!(state.tot_bit_arr), [:json])
+
+        {:reply, :ok, state }
     end
 
     def handle_call({:nonce, data}, _from, state) do

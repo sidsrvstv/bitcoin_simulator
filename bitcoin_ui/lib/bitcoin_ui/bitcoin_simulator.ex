@@ -64,6 +64,9 @@ defmodule BitcoinSimulator do
         if from != to do
           broadcast_transaction(transaction)
           Graph.add_transaction(j)
+          balances = get_user_balance_arr(nodes, [])
+          total = sum_balances(balances)
+          Graph.tot_bitcoins(total)
           IO.puts "Transaction number #{j} done"
         else
           IO.puts "Transaction number #{j} was invalid"
@@ -97,6 +100,24 @@ defmodule BitcoinSimulator do
       {:ok, block} = BlockChainServer.mine_block(data)
       BlockChainServer.add_block(block)
     end
+  end
+
+  def sum_balances([]) do
+    0
+  end
+
+  def sum_balances([h|t]) do
+    h + sum_balances(t)
+  end
+
+  def get_user_balance_arr([], bals) do
+    bals
+  end
+
+  def get_user_balance_arr(nodes, bals) do
+     [node | tail] = nodes
+     bals = bals ++ [User.get_balance(node)]
+     get_user_balance_arr(tail, bals)
   end
 
   def print_user_balance(nodes) do

@@ -16,16 +16,35 @@ import "phoenix_html"
 // Local files can be imported directly using relative paths, for example:
 // import socket from "./socket"
 
-var chart1, chart2, chart3;
+var chart1, chart2, chart3, chart4;
 
 function renderNonceChart(data, labels) {
   var ctx = document.getElementById("nonceChart").getContext('2d');
-  var chart1 = new Chart(ctx, {
+  var chart3 = new Chart(ctx, {
       type: 'line',
       data: {
           labels: labels,
           datasets: [{
               label: 'Nonce vs time',
+              data: data,
+          }]
+      },
+      options: {
+        animation: {
+          duration: 0
+        }
+      }
+  });
+}
+
+function renderTotalChart(data, labels) {
+  var ctx = document.getElementById("totalChart").getContext('2d');
+  var chart4 = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Total Bitcoins vs time',
               data: data,
           }]
       },
@@ -75,13 +94,13 @@ function makeChart(data, labels) {
         });
 }
 
-
-
 $(function(){
       //Stop button click
       $(".stop").click(function(){
         clearInterval(timer);
         clearInterval(timer2);
+        clearInterval(timer3);
+        clearInterval(timer4);
       });
 
       var timer = setInterval(function() {
@@ -106,7 +125,7 @@ $(function(){
       });
     }, 500);
 
-    var timer2 = setInterval(function() {
+    var timer3 = setInterval(function() {
       $.getJSON('/nonce', { get_param: 'value' }, function(data) {
         var x=[], y = [];
           $.each(data, function(index, element) {
@@ -114,6 +133,17 @@ $(function(){
             y.push(element.y);
           });
           renderNonceChart(y,x);
+      });
+    }, 500);
+
+    var timer4 = setInterval(function() {
+      $.getJSON('/total', { get_param: 'value' }, function(data) {
+        var x=[], y = [];
+          $.each(data, function(index, element) {
+            x.push(element.x);
+            y.push(element.y);
+          });
+          renderTotalChart(y,x);
       });
     }, 500);
 });
