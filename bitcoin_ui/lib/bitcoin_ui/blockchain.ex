@@ -110,6 +110,7 @@ defmodule BlockChainServer do
 
   def handle_call({:mine_block, {data, previous_hash}}, _from, state) do
     {:ok, new_block} = Block.mine_block([data, previous_hash])  # spend time to mine block
+    Graph.nonce(new_block.nonce)
     {:reply, {:ok, new_block}, state }
   end
 
