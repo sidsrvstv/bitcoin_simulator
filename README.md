@@ -27,8 +27,11 @@ A brief description of the modules is as follows:
 `Topology`: It maintains the network connection. It can be accessed to get list of all users keys and neigbors for a particular user.
 
 
-All user balances are calculated by traversing the blockchain, no seperate fields for account balance are maintained. 
+All user balances are calculated by traversing the blockchain, no seperate fields for account balance are maintained.
 
+##Front-end
+
+As suggested we have used Pheonix framework for our web endpoints and chart.js to render our graphs. We have also used MVC pattern for this project. The simulator outputs data into a file database. The controller reads this data, parses it and pushes datapoints to the views which generate graphs to render this data. The file database is present priv/data. For views we have used html, css and javascript code to render our UI. 
 
 ## Installation and Running
 
@@ -47,13 +50,18 @@ $> mix test test/bitcoin_simulator_test.exs
 Please run the following commands to run the application
 $> cd bitcoin_ui/
 
+You might also have to install some npm modules. If needed do this
+
+$> cd assets
+
+$> npm install
+
 $> mix deps.get
 The above command because our app has some dependencies.
 
 $> mix phx.server
 
-This starts pheonix server which also starts the simulation for 100 users. and also hosts the webpoints. After running this command, using your browser to visit localhost:4000 will show you the graphs we have built. 
-
+This starts pheonix server which also starts the simulation for 100 users. and also hosts the webpoints. The simulator outputs data in to files in priv/data. These files are then read for new data points and pushed out the browser to be shown in graphs.  After running this command, using your browser to visit localhost:4000 will show you the graphs we have built. 
 
 The number of transactions has been hard coded in the code. We tried upto 100 Users and 1000 transactions for which our system took about 90 minutes to complete.
 
@@ -61,8 +69,6 @@ We also output several files to help the user see the results like
 	- transaction.txt which consists of every transaction that was valid. 
 	- user_balance.txt which contains balance of all users after every valid transaction
 	- miner_name.txt which tells which user was the miner for every valid transaction
-
-
 
 ## TestCase description
 
