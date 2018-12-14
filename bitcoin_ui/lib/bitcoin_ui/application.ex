@@ -26,7 +26,7 @@ defmodule BitcoinUi.Application do
 
     # spawn(BitcoinUi.Application, :generate_random_values,[])
     # spawn(BitcoinUi.Application, :generate_random_values2,[])
-    total_users = ["25"] #System.argv()
+    total_users = ["100"] #System.argv()
     
     BitcoinSimulator.main(total_users)
 

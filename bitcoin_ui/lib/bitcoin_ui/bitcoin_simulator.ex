@@ -49,7 +49,7 @@ defmodule BitcoinSimulator do
 
     introduce_bitcoins(nodes)
 
-    number_of_transactions = 10
+    number_of_transactions = 30
 
     for j <- 1..number_of_transactions do
       from = Enum.random(nodes)

@@ -2,6 +2,8 @@
 Siddharth Srivastava - 6316 6628
 Nanda Kishore - 6239 6049
 
+Link for video on youtube : https://www.youtube.com/watch?v=_IIwAhyQIlw
+
 # BitcoinSimulator
 
 **Distributed Protocol description**
@@ -24,7 +26,7 @@ A brief description of the modules is as follows:
 `BlockChain` : A list of Blocks
 `User` : All users are genservers. A user is accessed through its public key. It is responsible for creating its own transaciton data, mining and broadcasting to all users messages and blocks.
 `Consensus`: A GenServer which keeps tally of votes for every transaction. Every vote is a tuple of public_key and block which all users have received in their mailbox for a particular transaction. The winner of the voting is added to the blockchain. In case of ties, the block which had reached the consensus actor first is the winner
-`Topology`: It maintains the network connection. It can be accessed to get list of all users keys and neigbors for a particular user.
+`Topology`: It maintains the network connection. It can be accessed to get list of all users keys and neighbors for a particular user.
 
 
 All user balances are calculated by traversing the blockchain, no seperate fields for account balance are maintained.
@@ -61,9 +63,12 @@ The above command because our app has some dependencies.
 
 $> mix phx.server
 
+To stop simulation:
+Press Ctrl + C.
+
 This starts pheonix server which also starts the simulation for 100 users. and also hosts the webpoints. The simulator outputs data in to files in priv/data. These files are then read for new data points and pushed out the browser to be shown in graphs.  After running this command, using your browser to visit localhost:4000 will show you the graphs we have built. 
 
-The number of transactions has been hard coded in the code. We tried upto 100 Users and 1000 transactions for which our system took about 90 minutes to complete.
+The number of transactions has been hard coded in the code. We tried upto `100 Users and 1000 transactions` for which our system took about 90 minutes to complete.
 
 We also output several files to help the user see the results like 
 	- transaction.txt which consists of every transaction that was valid. 
