@@ -27,8 +27,6 @@ defmodule Block do
 
     {:ok, {final_hash, final_nonce}} = mine({data, previous_hash, hash}, nonce, difficulty)
 
-    Graph.nonce(final_nonce)
-
     state1 = Map.put(state, :nonce, final_nonce)
     state2 = Map.put(state1, :hash, final_hash)
 
