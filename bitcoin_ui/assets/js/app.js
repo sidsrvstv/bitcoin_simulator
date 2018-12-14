@@ -27,13 +27,22 @@ function renderNonceChart(data, labels) {
           datasets: [{
               label: 'Nonce vs time',
               data: data,
+              orderColor: 'rgba(242, 47, 47, 1)',
+              backgroundColor: 'rgba(242, 47, 47, 0.2)',
           }]
       },
       options: {
         animation: {
           duration: 0
+        },           
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                }
+            }]                
         }
-      }
+    },
   });
 }
 
@@ -46,13 +55,22 @@ function renderTotalChart(data, labels) {
           datasets: [{
               label: 'Total Bitcoins vs time',
               data: data,
+              orderColor: 'rgba(47, 47, 242, 1)',
+              backgroundColor: 'rgba(47, 47, 242, 0.2)',
           }]
       },
       options: {
         animation: {
           duration: 0
+        },           
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                }
+            }]                
         }
-      }
+    },
   });
 }
 
@@ -65,13 +83,22 @@ function renderUbalChart(data, labels) {
           datasets: [{
               label: 'Users vs balances',
               data: data,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
           }]
       },
       options: {
         animation: {
           duration: 0
+        },           
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                }
+            }]                
         }
-      }
+    },
   });
 }
 
@@ -84,13 +111,22 @@ function renderChart(data, labels) {
             datasets: [{
                 label: 'Transaction vs time',
                 data: data,
-            }]
-        },
-        options: {
-          animation: {
-            duration: 0
-          }
+                borderColor: 'rgba(47, 242, 47, 1)',
+                backgroundColor: 'rgba(47, 242, 47, 0.2)',
+          }]
+      },
+      options: {
+        animation: {
+          duration: 0
+        },           
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                }
+            }]                
         }
+    },
     });
 }
 
@@ -101,7 +137,7 @@ function makeChart(data, labels) {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Months',
+                    label: '',
                     data: data,
                 }]
             },
