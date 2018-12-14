@@ -56,6 +56,25 @@ function renderTotalChart(data, labels) {
   });
 }
 
+function renderUbalChart(data, labels) {
+  var ctx = document.getElementById("ubalChart").getContext('2d');
+  var chart4 = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Users vs balances',
+              data: data,
+          }]
+      },
+      options: {
+        animation: {
+          duration: 0
+        }
+      }
+  });
+}
+
 function renderChart(data, labels) {
     var ctx = document.getElementById("myChart").getContext('2d');
     var chart1 = new Chart(ctx, {
@@ -144,6 +163,17 @@ $(function(){
             y.push(element.y);
           });
           renderTotalChart(y,x);
+      });
+    }, 500);
+
+    var timer5 = setInterval(function() {
+      $.getJSON('/userbalance', { get_param: 'value' }, function(data) {
+        var x=[], y = [];
+          $.each(data, function(index, element) {
+            x.push(element.x);
+            y.push(element.y);
+          });
+          renderUbalChart(y,x);
       });
     }, 500);
 });

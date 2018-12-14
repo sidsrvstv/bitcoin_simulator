@@ -30,6 +30,9 @@
     <div class="container">
         <canvas id="totalChart"></canvas>
     </div>
+    <div class="container">
+        <canvas id="ubalChart"></canvas>
+    </div>
 
 </body>
 

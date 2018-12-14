@@ -19,7 +19,7 @@ defmodule BitcoinUiWeb.Router do
     get "/", PageController, :index
     get "/anotherGraph", PageController, :index
     get "/transactiontime", PageController, :chart
-    get "/userbalance", PageController, :test
+    get "/userbalance", PageController, :ubal
     get "/nonce", PageController, :nonce
     get "/total", PageController, :total
     get "/test", PageController, :index
