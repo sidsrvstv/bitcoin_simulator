@@ -32,6 +32,18 @@ All user balances are calculated by traversing the blockchain, no seperate field
 
 ## Installation and Running
 
+**For TestCases**
+$> mix deps.get
+The above command because our app has some dependencies.
+
+$> mix compile
+To compile the app
+
+To run the tests, please use the following command
+$> mix test test/bitcoin_simulator_test.exs 
+
+** For Web Interface **
+
 Please run the following commands to run the application
 $> cd bitcoin_ui/
 
@@ -42,14 +54,9 @@ $> mix phx.server
 
 This starts pheonix server which also starts the simulation for 100 users. and also hosts the webpoints. After running this command, using your browser to visit localhost:4000 will show you the graphs we have built. 
 
-To run the tests, please use the following command
-$> mix test test/bitcoin_simulator_test.exs 
 
-<!-- To start the simulation, please run the system as follows
-$> mix run lib/bitcoin_simulator.ex 100 -->
+The number of transactions has been hard coded in the code. We tried upto 100 Users and 1000 transactions for which our system took about 90 minutes to complete.
 
-Where the first argument is the number of Users desired in the application. Also, the number of transactions has been hard coded as 1000 in the code.
-After 1000 transactions, the app exits. 
 We also output several files to help the user see the results like 
 	- transaction.txt which consists of every transaction that was valid. 
 	- user_balance.txt which contains balance of all users after every valid transaction
