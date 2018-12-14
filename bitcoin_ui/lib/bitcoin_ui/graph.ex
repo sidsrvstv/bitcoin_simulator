@@ -5,7 +5,7 @@ end
 
 defmodule Graph do
     use GenServer
-    
+
     def start_link() do
         GenServer.start_link(__MODULE__, [], name: :graph)
     end
@@ -68,35 +68,49 @@ defmodule Graph do
     end
 
     def handle_call({:update_balance, data}, _from, state) do
-        IO.inspect data
-        state = 
-        if get_in(state, [:balance, data[0]]) == nil do
-            put_in(state, [:balance, data[0]], data[1])
-        else
-            put_in(state, [:balance, data[0]], data[1])
-        end
+        # IO.inspect state
+        # IO.puts  "+++"
+        user = Enum.at(data, 0)
+        amount = Enum.at(data, 1)
+        map_balance = Map.fetch!(state, :balance)
+        new_map_balance = Map.put(map_balance, user, amount) # replaces old if present else just adds new key
+        new_state = Map.put(state, :balance, new_map_balance) # replace old map with new
 
-        IO.inspect state.balance
-        
-        keys = Map.get(state, :balance)
-        balance_arr = add_bal([], keys, state)
+        # IO.inspect new_state
+        # IO.puts "+++"
+
+        # state =
+        # if get_in(state, [:balance, data[0]]) == nil do
+        #     put_in(state, [:balance, data[0]], data[1])
+        # else
+        #     put_in(state, [:balance, data[0]], data[1])
+        # end
+
+        # IO.inspect state.balance
+        all_users = Map.keys(new_map_balance)
+        # keys = Map.get(state, :balance)
+        # IO.inspect keys
+        # IO.puts "-----"
+        balance_arr = add_bal([], all_users, new_map_balance)
 
         File.write("./priv/data/balance.json", Poison.encode!(balance_arr), [:json])
 
-        {:reply, :ok, state }
+        {:reply, :ok, new_state }
     end
 
-    def add_bal(list, [], state) do
+    def add_bal(list, [], _state) do
         list
     end
 
-    def add_bal(list, keys, state) do
+    def add_bal(list, keys, map) do
         [key | tail] = keys
 
-        bal = get_in(state, [:balance, key])
+        bal = Map.fetch!(map, key)
+        # bal = get_in(state, [:balance, key])
         bal_obj = %Coord{x: key, y: bal}
-
-        list = list ++ bal_obj
-        add_bal(list, tail, state)
+        # IO.puts "#{key} == #{bal}"
+        # IO.puts "+++++++++++++++"
+        list = list ++ [bal_obj]
+        add_bal(list, tail, map)
     end
 end

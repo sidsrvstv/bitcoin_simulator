@@ -122,11 +122,14 @@ defmodule BitcoinSimulator do
 
   def print_user_balance(nodes) do
     filename = "user_balance.txt"
-    Enum.each nodes, fn(key) ->
+    # Enum.each nodes, fn(key) ->
+    for i <- 0..length(nodes)-1 do
+      key = Enum.at(nodes, i)
       balance = User.get_balance(key)
       # key = String.slice(key, 177..-27)
-      # data = [String.to_atom(key), balance]
-      # Graph.update_balance(data)
+      user = "user" <> Integer.to_string(i)
+      data = [String.to_atom(user), balance]
+      Graph.update_balance(data)
       File.write(filename, "#{key} ====== #{balance}\n", [:append])
     end
     File.write(filename, "=================================================\n\n", [:append])
