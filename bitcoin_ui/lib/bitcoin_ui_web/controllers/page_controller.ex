@@ -44,8 +44,4 @@ defmodule BitcoinUiWeb.PageController do
     |> send_resp(200, Application.app_dir(:bitcoin_ui, "priv/data/balance.json")
     |> File.read!)
   end
-
-  def show(conn, %{"messenger" => messenger}) do
-    render(conn, "show.html", messenger: messenger)
-  end
 end
