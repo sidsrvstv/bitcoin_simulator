@@ -1,9 +1,4 @@
 
-Siddharth Srivastava - 6316 6628
-Nanda Kishore - 6239 6049
-
-Link for video on youtube : https://www.youtube.com/watch?v=_IIwAhyQIlw
-
 # BitcoinSimulator
 
 **Distributed Protocol description**
